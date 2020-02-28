@@ -1,0 +1,16 @@
+[package]
+name = "digester-cli"
+version = "0.1.0"
+authors = ["Matheus Xavier <mxavier@bpmx.io>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0"
+clap = "2.33.0"
+digester = {"path" = ".."}
+digest = "0.8.1"
+hex = "0.4.2"
+sha2 = "0.8.1"
+sha-1 = "0.8.2"
