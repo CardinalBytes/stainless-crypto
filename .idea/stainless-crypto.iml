@@ -6,11 +6,6 @@
       <sourceFolder url="file://$MODULE_DIR$/examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/benches" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/digester-cli/src" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/digester-cli/examples" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/digester-cli/tests" isTestSource="true" />
-      <sourceFolder url="file://$MODULE_DIR$/digester-cli/benches" isTestSource="true" />
-      <excludeFolder url="file://$MODULE_DIR$/digester-cli/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

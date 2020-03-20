@@ -1,6 +1,15 @@
 use digest::Digest;
-use anyhow::Result;
+use anyhow::{Result, Error};
 use hex::encode;
+
+fn copy_to_buffer(source: &[u8], buffer: &mut [u8]) -> Result<(), Error> {
+	if source.len() > buffer.len() {
+		Err(anyhow::anyhow!("the size of the result buffer is insufficient for the chosen digest"))
+	} else {
+		buffer.clone_from_slice(source);
+		Ok(())
+	}
+}
 
 pub fn bin_oneshot<D: Digest>(data: &[u8]) -> Vec<u8> {
 	let result = D::digest(data);
@@ -14,11 +23,9 @@ pub fn str_oneshot<D: Digest>(data: &[u8]) -> String {
 
 pub fn naloc_bin_oneshot<D: Digest>(data: &[u8], result: &mut [u8]) -> Result<()> {
 	let digest = D::digest(data);
-	if result.len() < digest.len() {
-		Err(anyhow::anyhow!("the size of the result buffer is insufficient for the chosen digest"))
-	} else {
-		result.clone_from_slice(digest.as_slice());
-		Ok(())
+	match copy_to_buffer(digest.as_slice(), result) {
+		Ok(_) => Ok(()),
+		Err(e) => Err(e)
 	}
 }
 
@@ -32,11 +39,9 @@ pub fn extract_str<D: Digest>(digest: D) -> String {
 
 pub fn naloc_extract_bin<D: Digest>(digest: D, result: &mut [u8]) -> Result<()> {
 	let digest = digest.result();
-	if result.len() < digest.len() {
-		Err(anyhow::anyhow!("the size of the result buffer is insufficient for the chosen digest"))
-	} else {
-		result.clone_from_slice(digest.as_slice());
-		Ok(())
+	match copy_to_buffer(digest.as_slice(), result) {
+		Ok(_) => Ok(()),
+		Err(e) => Err(e)
 	}
 }
 

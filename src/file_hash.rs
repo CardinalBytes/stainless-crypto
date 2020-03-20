@@ -1,43 +1,33 @@
 use std::path::Path;
 use digest::Digest;
-use anyhow::{Result, Context, Error};
+use anyhow::{Result, Error};
 use std::fs::File;
 use std::io::{BufReader, Read};
-use crate::foundation::extract_str;
+use crate::hashing::naloc_extract_bin;
 
-/// # Hash a file with a buffer backing
+/// # Hash a file with a buffer backing no allocation for result
 /// __for best performance `block_size` == cipher block size__
-pub fn hash_file_buffered<D: Digest>(path: &Path, buffer_size: usize, block_size: usize) -> Result<String, Error> {
+pub fn naloc_hash_file<D: Digest>(path: &Path, block_size: usize, buff_capacity: usize,
+                                     digest_buffer: &mut [u8]) -> Result<(), Error> {
+	let mut digest = D::new();
 	let mut block = vec![0x00 as u8; block_size];
 
-	let canon_path = match path.exists() {
-		true => {
-			let canon = path.canonicalize()
-				.with_context(|| {
-					format!("Failed to make canon path from {}", path.display())
-				})?;
-			canon
-		}
-		,
-		false => return Err(anyhow::anyhow!("No file named {}", path.display())),
-	};
 
 	let mut reader = match File::open(path) {
-		Ok(fp) => BufReader::with_capacity(buffer_size,fp),
-		Err(e) => return Err(anyhow::anyhow!("Could not open {}", canon_path.display())),
+		Ok(fp) =>
+			BufReader::with_capacity(buff_capacity, fp),
+		Err(_) => return Err(anyhow::anyhow!("Could not open {}", path.display())),
 	};
-
-	let mut digest = D::new();
 
 	loop {
-		match reader.read(&mut block) {
-			Ok(read) => if read > 0 && read <= block.len() {
-				digest.input(&mut block[0 .. read]);
-			} else {
-				return Ok(extract_str::<D>(digest))
-			}
-			Err(e) => return Err(anyhow::anyhow!("Error reading from buffer: {}", e))
+		let read = reader.read(block.as_mut_slice())?;
+		if read == block_size  {
+			digest.input(&mut block);
+		} else {
+			digest.input(&mut block[0 .. read]);
+			naloc_extract_bin::<D>(digest, digest_buffer)?;
+			drop(reader);
+			return Ok(())
 		}
-	};
-
+	}
 }

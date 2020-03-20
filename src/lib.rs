@@ -1,4 +1,5 @@
 #![feature(test)]
+#![allow(clippy::pedantic)]
 
-pub mod foundation;
+pub mod hashing;
 pub mod file_hash;
